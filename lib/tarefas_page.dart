@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TarefasPage extends StatefulWidget {
   const TarefasPage({super.key});
@@ -8,22 +9,40 @@ class TarefasPage extends StatefulWidget {
 }
 
 class _TarefasPageState extends State<TarefasPage> {
+  late SharedPreferences prefs; //instancia do shared preference
   List<String> tarefas = ["Pagar contas", "Comprar roupas"];
 
   String novatarefa = "";
-
+  //queremos salvar na memoria do dispositivo então colocamos prefs.set(e escolhemos qual vamos salvar)prefs.setStringList, onde colocamos a key e o value, onde value é a função da criação da lista
   void addtarefa() {
     if (novatarefa != "") {
       setState(() {
         tarefas.add(novatarefa);
       });
+      prefs.setStringList("Tarefas", tarefas);
     }
   }
 
   void removertarefa(String tarefa) {
     setState(() {
       tarefas.remove(tarefa);
+      prefs.setStringList("Tarefas", tarefas);
     });
+  }
+
+  @override //começa escrevendo o initstate que ele faz todo o codigo nescessario(o codigo abaixo), set state é passar um valor, o init é atribuir um valor
+  void initState() {
+    super.initState();
+    carregartarefas();
+  }
+
+  Future<void> carregartarefas() async {
+    prefs =
+        await SharedPreferences.getInstance(); //await significa esperar que a variavel receba um valor antes de avançar, ele está vermelho pois precissamos dizer que ela é assincroma, só clicar nela e colocar async
+    //??[] caso seja nula a lista passa um alista vazia para tarefas
+    setState(() {
+      tarefas = prefs.getStringList("Tarefas") ?? [];
+    }); //para mudar o valor de uma variavel o set tem que ser chamado
   }
 
   @override
